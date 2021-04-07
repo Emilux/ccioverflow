@@ -22,11 +22,10 @@ class UserFixtures extends Fixture
         $this->encoder = $encoder;
     }
 
-
     public function load(ObjectManager $manager)
     {
         $faker = Faker::create();
-
+        //add user
         $user = new User();
         $user
             ->setEmail('admin@email.com')
