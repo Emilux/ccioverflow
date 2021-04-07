@@ -25,10 +25,15 @@
                 <td>{{ topic.createdAt ? topic.createdAt|date('Y-m-d H:i:s') : '' }}</td>
                 <td>{{ topic.updatedAt ? topic.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
                 <td>
+
                     <a href="{{ path('topic_show', {'id': topic.id}) }}">show</a>
-                    <a href="{{ path('topic_edit', {'id': topic.id}) }}">edit</a>
+                    {% if (app.user and app.user.id == topic.user.id) or is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('topic_edit', {'id': topic.id}) }}">edit</a>
+                        <a href="{{ path('topic_edit', {'id': topic.id}) }}">delete</a>
+                    {% endif %}
                 </td>
             </tr>
+
         {% else %}
             <tr>
                 <td colspan="6">no records found</td>
@@ -36,6 +41,8 @@
         {% endfor %}
         </tbody>
     </table>
-
-    <a href="{{ path('topic_new') }}">Create new</a>
+    {{ dump(app.user) }}
+    <div class="pagination text-center mx-auto">
+        {{ knp_pagination_render(topics) }}
+    </div>
 {% endblock %}

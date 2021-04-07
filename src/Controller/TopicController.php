@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\Topic;
 use App\Form\TopicType;
 use App\Repository\TopicRepository;
+use Knp\Component\Pager\PaginatorInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,15 +20,24 @@ class TopicController extends AbstractController
     /**
      * @Route("/", name="topic_index", methods={"GET"})
      */
-    public function index(TopicRepository $topicRepository): Response
+    public function index(Request $request, TopicRepository $topicRepository, PaginatorInterface $paginator): Response
     {
+        //set page at 1 by default
+        $page = $request->query->getInt('page') ? $request->query->getInt('page') : 1;
+
+        $topics = $paginator->paginate($topicRepository->findAll(),
+            $page,
+            12
+        );
+
         return $this->render('topic/index.html.twig', [
-            'topics' => $topicRepository->findAll(),
+            'topics' => $topics,
         ]);
     }
 
     /**
      * @Route("/new", name="topic_new", methods={"GET","POST"})
+     * @Security("(is_granted('ROLE_USER'))")
      */
     public function new(Request $request): Response
     {
@@ -60,6 +71,7 @@ class TopicController extends AbstractController
 
     /**
      * @Route("/{id}/edit", name="topic_edit", methods={"GET","POST"})
+     * @Security("(is_granted('ROLE_USER') and topic.getUser() == user) or is_granted('ROLE_ADMIN')")
      */
     public function edit(Request $request, Topic $topic): Response
     {
@@ -80,6 +92,7 @@ class TopicController extends AbstractController
 
     /**
      * @Route("/{id}", name="topic_delete", methods={"POST"})
+     * @Security("(is_granted('ROLE_USER') and topic.getUser() == user) or is_granted('ROLE_ADMIN')")
      */
     public function delete(Request $request, Topic $topic): Response
     {
